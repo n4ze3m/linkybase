@@ -141,7 +141,11 @@ export function NavbarDashboard() {
     <Navbar height={700} width={{ sm: 300 }} p="md" className={classes.navbar}>
       <Navbar.Section className={classes.section}>
         <div className={classes.mainLinks}>
-          <UnstyledButton className={classes.mainLink}>
+          <UnstyledButton
+            className={classes.mainLink}
+            onClick={() =>
+              router.push("/dashboard")}
+          >
             <div className={classes.mainLinkInner}>
               <IconInbox
                 size={20}
@@ -303,3 +307,4 @@ function CreateCollection({ setHidden }: {
     </form>
   );
 }
+

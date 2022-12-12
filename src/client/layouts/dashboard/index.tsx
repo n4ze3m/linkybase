@@ -4,19 +4,17 @@ import {
   Avatar,
   Box,
   Burger,
-  Container,
+  Button,
   createStyles,
-  Divider,
   Group,
   Header,
-  Indicator,
   MediaQuery,
-  Menu,
-  Navbar,
+  Modal,
   Text,
-  ThemeIcon,
+  TextInput,
   UnstyledButton,
 } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useUser } from "@supabase/auth-helpers-react";
 import { IconChevronDown, IconPlus, IconSearch } from "@tabler/icons";
 import { useRouter } from "next/router";
@@ -103,11 +101,11 @@ type Props = {
 };
 
 function DashboardLayout({ children }: Props) {
-
   const router = useRouter();
   const [opened, setOpened] = React.useState(false);
   const { classes, cx } = useStyles();
   const [userMenuOpened, setUserMenuOpened] = React.useState(false);
+  const [createLink, setCreateLink] = React.useState(false);
 
   const user = useUser();
 
@@ -149,7 +147,9 @@ function DashboardLayout({ children }: Props) {
               </div>
 
               <Group position="right">
-                <ActionIcon>
+                <ActionIcon
+                  onClick={() => setCreateLink(true)}
+                >
                   <IconPlus />
                 </ActionIcon>
                 <ActionIcon>
@@ -181,8 +181,61 @@ function DashboardLayout({ children }: Props) {
       }
     >
       {children}
+      <Modal
+        opened={createLink}
+        onClose={() => setCreateLink(false)}
+        title="Create Link"
+      >
+        <CreateLink setHidden={setCreateLink} />
+      </Modal>
     </AppShell>
   );
 }
 
 export default DashboardLayout;
+
+function CreateLink({ setHidden }: {
+  setHidden: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const form = useForm({
+    initialValues: {
+      url: "",
+    },
+  });
+
+  const client = trpc.useContext();
+
+  const {
+    mutate: createLink,
+    isLoading
+  } = trpc.link.create.useMutation({
+    onSuccess: () => {
+      client.collection.invalidate();
+      client.link.invalidate();
+      setHidden(false);
+    },
+  });
+
+  return (
+    <form
+      onSubmit={form.onSubmit((values) => createLink(values))}
+    >
+      <TextInput
+        placeholder="Paste link"
+        style={{ width: "100%" }}
+        {...form.getInputProps("url")}
+        required
+      />
+      <Group position="right">
+        <Button
+          my="md"
+          color="teal"
+          type="submit"
+          loading={isLoading}
+        >
+          Save Link
+        </Button>
+      </Group>
+    </form>
+  );
+}

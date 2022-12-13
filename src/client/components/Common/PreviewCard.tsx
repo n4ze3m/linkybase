@@ -9,12 +9,8 @@ import {
   Text,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
-import {
-  IconArrowAutofitRight,
-  IconArrowsTransferDown,
-  IconTransferOut,
-  IconTrash,
-} from "@tabler/icons";
+import { IconArrowAutofitRight, IconTrash } from "@tabler/icons";
+import { trpc } from "src/utils/trpc";
 
 const useStyles = createStyles((theme) => ({
   linkContainer: {
@@ -37,9 +33,21 @@ const useStyles = createStyles((theme) => ({
     width: 100,
   },
 }));
+// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const PreviewCard = (data: any) => {
   const { classes } = useStyles();
   const { hovered, ref } = useHover();
+
+  const client = trpc.useContext();
+
+  const {
+    mutate: deleteLink,
+  } = trpc.link.delete.useMutation({
+    onSuccess: () => {
+      client.link.invalidate();
+      client.collection.invalidate();
+    },
+  });
 
   return (
     <Card
@@ -49,7 +57,6 @@ export const PreviewCard = (data: any) => {
       radius="md"
       withBorder={true}
       ref={ref}
-      
     >
       <Group
         noWrap
@@ -90,10 +97,19 @@ export const PreviewCard = (data: any) => {
         hidden={!hovered}
       >
         <Group>
-          <ActionIcon>
+          <ActionIcon
+            onClick={data.onMove}
+          >
             <IconArrowAutofitRight />
           </ActionIcon>
-          <ActionIcon>
+          <ActionIcon
+            color="red"
+            onClick={() => {
+              deleteLink({
+                id: data.id,
+              });
+            }}
+          >
             <IconTrash />
           </ActionIcon>
         </Group>

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { Context } from "../context"
 import { paginationType } from "../schema/common.schema"
-import { createLinkType } from "../schema/link.schema"
+import { createLinkType, deleteLinkType, moveLinkType } from "../schema/link.schema"
 
 
 export const getInboxLinks = async (
@@ -23,34 +23,36 @@ export const getInboxLinks = async (
         })
     }
 
-    const inboxLength = await ctx.prisma.link.count({
-        where: {
-            userId: user.id,
-            isInbox: true
-        }
-    })
+
 
     const take = input.limit || 10
-    const skip = input.cursor || 0
+    const { cursor } = input;
+
 
     const links = await ctx.prisma.link.findMany({
         where: {
             userId: user.id,
             isInbox: true
         },
-        take,
-        skip,
+        take: take + 1,
+        cursor: cursor ? { id: cursor } : undefined,
         orderBy: {
             sortIndex: "asc"
-        }
+        },
     })
 
-    const nextPageCursor = inboxLength - (skip + take) > 0 ? skip + take : null
+    let nextCursor: typeof cursor | undefined = undefined;
+
+    if (links.length > take) {
+        const nextItem = links.pop()
+        nextCursor = nextItem!.id;
+    }
+
 
 
     return {
         items: links,
-        nextCursor: nextPageCursor
+        nextCursor: nextCursor
     }
 
 }
@@ -106,5 +108,113 @@ export const createLink = async (
     })
 
     return link
+
+}
+
+
+export const moveLink = async ({
+    ctx,
+    input
+}: {
+    ctx: Context,
+    input: moveLinkType
+}) => {
+
+    const { user } = ctx
+
+    if (!user) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to create a link"
+        })
+    }
+
+    const { linkId, collectionId } = input
+
+    await ctx.prisma.link.updateMany({
+        where: {
+            userId: user.id,
+            isInbox: false,
+            collectionId: collectionId
+        },
+        data: {
+            sortIndex: {
+                increment: 1
+            }
+        }
+    })
+
+    await ctx.prisma.link.update({
+        where: {
+            id: linkId
+        },
+        data: {
+            collectionId,
+            isInbox: false,
+            sortIndex: 1
+        }
+    })
+
+    return "OK"
+}
+
+export const deleteLink = async ({
+    ctx,
+    input
+}: {
+    ctx: Context,
+    input: deleteLinkType
+}) => {
+    const user = ctx.user
+
+    if (!user) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to delete a link"
+        })
+    }
+
+    const { id } = input
+
+
+    const isExist = await ctx.prisma.link.findUnique({
+        where: {
+            id
+        }
+    })
+
+    if (!isExist || isExist.userId !== user.id) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Link not found"
+        })
+    }
+
+    await ctx.prisma.link.updateMany({
+        where: {
+            userId: user.id,
+            isInbox: isExist.isInbox,
+            collectionId: isExist.collectionId,
+            sortIndex: {
+                gt: isExist.sortIndex
+            }
+        },
+        data: {
+            sortIndex: {
+                decrement: 1
+            }
+        }
+    })
+
+
+    await ctx.prisma.link.delete({
+        where: {
+            id
+        }
+    })
+
+
+    return "OK"
+
 
 }

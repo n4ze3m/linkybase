@@ -20,6 +20,7 @@ import { useForm } from "@mantine/form";
 import { trpc } from "src/utils/trpc";
 import { NavbarLoading } from "./NavbarLoading";
 import { useRouter } from "next/router";
+import { showNotification } from "@mantine/notifications";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -247,6 +248,13 @@ function CreateCollection({ setHidden }: {
     onSuccess: () => {
       client.collection.getAll.invalidate();
       setHidden(true);
+
+    },
+    onError: (err) => {
+      showNotification({
+        title: 'Default notification',
+        message: 'Hey there, your code is awesome! 🤥',
+      })
     },
   });
   return (
@@ -307,4 +315,3 @@ function CreateCollection({ setHidden }: {
     </form>
   );
 }
-

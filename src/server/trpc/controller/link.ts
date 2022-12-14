@@ -1,7 +1,9 @@
 import { TRPCError } from "@trpc/server"
+import axios from "axios"
 import { Context } from "../context"
 import { paginationType } from "../schema/common.schema"
 import { createLinkType, deleteLinkType, moveLinkType } from "../schema/link.schema"
+const R_URL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
 
 
 export const getInboxLinks = async (
@@ -76,10 +78,22 @@ export const createLink = async (
         })
     }
 
+    if (!R_URL.test(input.url)) {
+        throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid URL"
+        })
+    }
 
-    const title = `Mock title for now ${Math.random()}`
-    const description = "Mock description"
-    const image = "https://supabase.com/images/og/og-image.jpg"
+
+    const response = await axios.post(process.env.LINKY_SCRAPY_URL!, {
+        url: input.url
+    })
+
+
+    const title = response.data.title
+    const description = response.data.description
+    const image = response.data.image
 
     const sortIndex = 1
     // update sortIndex of all links in inbox to be +1

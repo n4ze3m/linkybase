@@ -114,11 +114,22 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function NavbarLoading() {
+interface NavbarLoadingProps {
+  opened: boolean;
+}
+
+export function NavbarLoading(props: NavbarLoadingProps) {
   const { classes } = useStyles();
 
   return (
-    <Navbar height={700} width={{ sm: 300 }} p="md" className={classes.navbar}>
+    <Navbar
+      hiddenBreakpoint="sm"
+      hidden={!props.opened}
+      height={700}
+      width={{ sm: 300 }}
+      p="md"
+      className={classes.navbar}
+    >
       <Navbar.Section className={classes.section}>
         <div className={classes.mainLinks}>
           <Skeleton height={40} radius="sm" />

@@ -1,5 +1,5 @@
-import { createCollectionController, getUserCollectionsController, getCollectionsByIdController , updateCollectionController, shareCollectionController} from "../controller/collection";
-import { createCollectionInput, getCollectionByIdInput,updateCollectionInput, collectionByID } from "../schema/collection.schema";
+import { createCollectionController, getUserCollectionsController, getCollectionsByIdController, updateCollectionController, shareCollectionController, getCollectionBySlug, } from "../controller/collection";
+import { createCollectionInput, getCollectionByIdInput, updateCollectionInput, collectionByID, collectionBySlug } from "../schema/collection.schema";
 import { publicProcedure, router } from "../trpc";
 
 export const collectionRouter = router({
@@ -7,5 +7,6 @@ export const collectionRouter = router({
     getAll: publicProcedure.query(getUserCollectionsController),
     getById: publicProcedure.input(getCollectionByIdInput).query(getCollectionsByIdController),
     update: publicProcedure.input(updateCollectionInput).mutation(updateCollectionController),
-    share: publicProcedure.input(collectionByID).mutation(shareCollectionController)
+    share: publicProcedure.input(collectionByID).mutation(shareCollectionController),
+    getBySlug: publicProcedure.input(collectionBySlug).query(getCollectionBySlug),
 })

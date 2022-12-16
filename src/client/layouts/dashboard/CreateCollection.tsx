@@ -39,46 +39,44 @@ export function CreateCollection({ setHidden }: {
     <form
       onSubmit={form.onSubmit(async (values) => createCollection(values))}
     >
-      <Group>
-        <Menu
-          withArrow
-          opened={showEmojiPicker}
-          onClose={() => setShowEmojiPicker(false)}
-        >
-          <Menu.Target>
-            <ActionIcon
-              size={22}
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              {form.values.emoji
-                ? (
-                  <Emoji
-                    unified={form.values.emoji}
-                    emojiStyle={EmojiStyle.APPLE}
-                    size={22}
-                  />
-                )
-                : <IconMoodSmile size={22} />}
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <EmojiPicker
-              theme={Theme.DARK}
-              onEmojiClick={(emoji) => {
-                form.setFieldValue("emoji", emoji.unified);
-                setShowEmojiPicker(false);
-              }}
-            />
-          </Menu.Dropdown>
-        </Menu>
-
-        <TextInput
-          placeholder="Create collection"
-          style={{ width: "90%" }}
-          {...form.getInputProps("name")}
-          required
-        />
-      </Group>
+      <TextInput
+        placeholder="Create collection"
+        rightSection={
+          <Menu
+            withArrow
+            opened={showEmojiPicker}
+            onClose={() => setShowEmojiPicker(false)}
+          >
+            <Menu.Target>
+              <ActionIcon
+                size={22}
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                {form.values.emoji
+                  ? (
+                    <Emoji
+                      unified={form.values.emoji}
+                      emojiStyle={EmojiStyle.APPLE}
+                      size={22}
+                    />
+                  )
+                  : <IconMoodSmile size={22} />}
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <EmojiPicker
+                theme={Theme.DARK}
+                onEmojiClick={(emoji) => {
+                  form.setFieldValue("emoji", emoji.unified);
+                  setShowEmojiPicker(false);
+                }}
+              />
+            </Menu.Dropdown>
+          </Menu>
+        }
+        {...form.getInputProps("name")}
+        required
+      />
 
       <Group position="right">
         <Button

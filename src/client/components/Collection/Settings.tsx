@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Button,
+  Checkbox,
   Divider,
   Group,
   Menu,
@@ -15,8 +16,9 @@ import { showNotification } from "@mantine/notifications";
 import { Collection } from "@prisma/client";
 import { IconClipboard, IconMoodSmile } from "@tabler/icons";
 import EmojiPicker, { Emoji, EmojiStyle, Theme } from "emoji-picker-react";
+import { useRouter } from "next/router";
 import React from "react";
-import { getBaseUrl, trpc } from "src/utils/trpc";
+import { trpc } from "src/utils/trpc";
 
 interface SettingsModalProps extends Collection {
   onClose: () => void;
@@ -74,6 +76,14 @@ export const SettingsModal = (data: SettingsModalProps) => {
       setAlreadyLoaded(true);
     }
   }, [data]);
+
+  const router = useRouter()
+
+
+
+  const getBaseURL = () => {
+    return window.location.origin;
+  }
 
   return (
     <Modal
@@ -177,7 +187,7 @@ export const SettingsModal = (data: SettingsModalProps) => {
         <TextInput
           readOnly
           value={data.publicSlug
-            ? `${process.env.NEXT_PUBLIC_HOSTNAME}/p/${data.publicSlug}`
+            ? `${getBaseURL()}/p/${data.publicSlug}`
             : ""}
           rightSection={
             <ActionIcon>
@@ -186,6 +196,21 @@ export const SettingsModal = (data: SettingsModalProps) => {
           }
         />
       )}
+      <Divider my="md" />
+      <Text size="xs" color="red">
+        Danger Zone
+      </Text>
+      <Group position="apart" noWrap spacing="xl" my="md">
+        <div>
+          <Text>Delete Collection</Text>
+          <Checkbox 
+          size="sm"
+          label="Delete all links in this collection" color="red" />
+        </div>
+        <Button color="red" variant="outline">
+          Delete Collection
+        </Button>
+      </Group>
     </Modal>
   );
 };

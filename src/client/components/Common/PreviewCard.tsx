@@ -50,6 +50,7 @@ const useStyles = createStyles((theme) => ({
 
 interface PreviewCardProps extends Link {
   onMove: () => void;
+  hideActions?: boolean;
 }
 
 export const PreviewCard = (data: PreviewCardProps) => {
@@ -121,7 +122,7 @@ export const PreviewCard = (data: PreviewCardProps) => {
       </Group>
       <Paper
         className={classes.overlayMenu}
-        hidden={!hovered}
+        hidden={!hovered || data.hideActions}
       >
         <Group>
           <ActionIcon

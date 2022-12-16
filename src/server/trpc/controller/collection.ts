@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { Context } from "../context"
-import { collectionByIDType, createCollectionType, getCollectionByIdType, updateCollectionType } from "../schema/collection.schema"
+import { collectionByIDType, collectionBySlugType, createCollectionType, getCollectionByIdType, updateCollectionType } from "../schema/collection.schema"
 import slugify from "slugify"
 export const createCollectionController = async (
     {
@@ -245,5 +245,64 @@ export const shareCollectionController = async (
 
 
     return "Collection shared"
+
+}
+
+
+export const getCollectionBySlug = async (
+    {
+        ctx,
+        input
+    }: {
+        ctx: Context,
+        input: collectionBySlugType
+    }
+) => {
+
+
+    const collection = await ctx.prisma.collection.findFirst({
+        where: {
+            publicSlug: input.slug,
+            isPublic: true
+        }
+    })
+
+    if (!collection) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Collection not found"
+        })
+    }
+
+
+    const take = input.limit || 10
+    const { cursor } = input;
+
+
+    const links = await ctx.prisma.link.findMany({
+        where: {
+            isInbox: false,
+            collectionId: collection.id
+        },
+        take: take + 1,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: {
+            sortIndex: "asc"
+        },
+    })
+
+    let nextCursor: typeof cursor | undefined = undefined;
+
+    if (links.length > take) {
+        const nextItem = links.pop()
+        nextCursor = nextItem!.id;
+    }
+
+
+    return {
+        collection,
+        links,
+        nextCursor
+    }
 
 }

@@ -119,7 +119,11 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function NavbarDashboard() {
+interface NavbarProps {
+  opened: boolean;
+}
+
+export function NavbarDashboard(props: NavbarProps) {
   const { classes } = useStyles();
 
   const [hidden, setHidden] = React.useState(true);
@@ -131,11 +135,14 @@ export function NavbarDashboard() {
   } = trpc.collection.getAll.useQuery();
 
   if (isLoading) {
-    return <NavbarLoading />;
+    return <NavbarLoading opened={props.opened} />;
   }
 
   return (
-    <Navbar height={700} width={{ sm: 300 }} p="md" className={classes.navbar}>
+    <Navbar height={700} width={{ sm: 300 }} p="md" className={classes.navbar}
+    hiddenBreakpoint="sm"
+    hidden={!props.opened}
+    >
       <Navbar.Section className={classes.section}>
         <div className={classes.mainLinks}>
           <UnstyledButton

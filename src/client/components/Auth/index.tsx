@@ -25,7 +25,7 @@ export function AuthBody() {
 		});
 
 		if (error) {
-			throw new Error(error.message);
+			throw new Error(error?.message || "error");
 		}
 
 		if (data) {
@@ -36,7 +36,8 @@ export function AuthBody() {
 	};
 
 	const { isLoading, mutateAsync: sendMagicLink } = useMutation(handleSubmit, {
-		onError: () => {
+		onError: (e) => {
+			
 			showNotification({
 				title: "Error",
 				color: "red",

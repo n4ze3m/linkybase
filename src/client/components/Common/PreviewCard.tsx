@@ -9,8 +9,18 @@ import {
   Text,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
-import { IconArrowAutofitRight, IconTrash } from "@tabler/icons";
+import { IconArrowAutofitRight, IconLink, IconTrash } from "@tabler/icons";
 import { trpc } from "src/utils/trpc";
+import { Link } from "@prisma/client";
+
+function getDomain(url: string) {
+  const domain = url
+    .replace("http://", "")
+    .replace("https://", "")
+    .replace("www.", "")
+    .split(/[/?#]/)[0];
+  return domain;
+}
 
 const useStyles = createStyles((theme) => ({
   linkContainer: {
@@ -30,11 +40,19 @@ const useStyles = createStyles((theme) => ({
     top: 0,
     zIndex: 1,
     right: 0,
-    width: 100,
+    width: 130,
+  },
+
+  mousePointer: {
+    cursor: "pointer",
   },
 }));
-// rome-ignore lint/suspicious/noExplicitAny: <explanation>
-export const PreviewCard = (data: any) => {
+
+interface PreviewCardProps extends Link {
+  onMove: () => void;
+}
+
+export const PreviewCard = (data: PreviewCardProps) => {
   const { classes } = useStyles();
   const { hovered, ref } = useHover();
 
@@ -42,6 +60,7 @@ export const PreviewCard = (data: any) => {
 
   const {
     mutate: deleteLink,
+    isLoading: isDeleting,
   } = trpc.link.delete.useMutation({
     onSuccess: () => {
       client.link.invalidate();
@@ -56,7 +75,13 @@ export const PreviewCard = (data: any) => {
       shadow="sm"
       radius="md"
       withBorder={true}
+      className={classes.mousePointer}
       ref={ref}
+      onDoubleClick={() => {
+        if (window !== undefined) {
+          window.open(data.url, "_blank")?.focus();
+        }
+      }}
     >
       <Group
         noWrap
@@ -71,24 +96,26 @@ export const PreviewCard = (data: any) => {
             weight={700}
             lineClamp={1}
           >
-            {data.title}
+            {data.title || "No title"}
           </Text>
 
           <Text
             size="xs"
             lineClamp={1}
           >
-            {data.description}
+            {data.description || "No description"}
           </Text>
           <Text size="xs" color="dimmed">
-            example.com
+            {getDomain(data.url)}
           </Text>
         </div>
         <Card.Section>
           <Image
             src={data.image}
             height={100}
+            width={150}
             alt={data.title || "No title"}
+            withPlaceholder
           />
         </Card.Section>
       </Group>
@@ -98,12 +125,23 @@ export const PreviewCard = (data: any) => {
       >
         <Group>
           <ActionIcon
+            onClick={() => {
+              if (window !== undefined) {
+                window.open(data.url, "_blank")?.focus();
+              }
+            }}
+          >
+            <IconLink />
+          </ActionIcon>
+
+          <ActionIcon
             onClick={data.onMove}
           >
             <IconArrowAutofitRight />
           </ActionIcon>
           <ActionIcon
             color="red"
+            loading={isDeleting}
             onClick={() => {
               deleteLink({
                 id: data.id,

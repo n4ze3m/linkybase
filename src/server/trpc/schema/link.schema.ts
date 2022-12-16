@@ -14,8 +14,14 @@ export const deleteLinkInput = object({
     id: string(),
 })
 
+
+
+
+
+
 export type createLinkType = TypeOf<typeof createLinkInput>
 
 export type moveLinkType = TypeOf<typeof moveLinkInput>
 
 export type deleteLinkType = TypeOf<typeof deleteLinkInput>
+

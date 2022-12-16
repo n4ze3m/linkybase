@@ -1,26 +1,22 @@
 import {
   ActionIcon,
   Badge,
-  Button,
   createStyles,
   Group,
-  Menu,
   Modal,
   Navbar,
   Text,
-  TextInput,
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
-import { IconFolder, IconInbox, IconMoodSmile, IconPlus } from "@tabler/icons";
+import { IconFolder, IconInbox, IconPlus } from "@tabler/icons";
 import Link from "next/link";
 import React from "react";
-import EmojiPicker, { Emoji, EmojiStyle, Theme } from "emoji-picker-react";
-import { useForm } from "@mantine/form";
+import { Emoji, EmojiStyle } from "emoji-picker-react";
 import { trpc } from "src/utils/trpc";
 import { NavbarLoading } from "./NavbarLoading";
 import { useRouter } from "next/router";
-import { showNotification } from "@mantine/notifications";
+import { CreateCollection } from "./CreateCollection";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -228,90 +224,3 @@ export function NavbarDashboard() {
   );
 }
 
-function CreateCollection({ setHidden }: {
-  setHidden: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
-  const form = useForm({
-    initialValues: {
-      name: "",
-      emoji: "",
-    },
-  });
-
-  const client = trpc.useContext();
-
-  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
-  const {
-    isLoading,
-    mutateAsync: createCollection,
-  } = trpc.collection.create.useMutation({
-    onSuccess: () => {
-      client.collection.getAll.invalidate();
-      setHidden(true);
-
-    },
-    onError: (err) => {
-      showNotification({
-        title: 'Default notification',
-        message: 'Hey there, your code is awesome! 🤥',
-      })
-    },
-  });
-  return (
-    <form
-      onSubmit={form.onSubmit(async (values) => createCollection(values))}
-    >
-      <Group>
-        <Menu
-          withArrow
-          opened={showEmojiPicker}
-          onClose={() => setShowEmojiPicker(false)}
-        >
-          <Menu.Target>
-            <ActionIcon
-              size={22}
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              {form.values.emoji
-                ? (
-                  <Emoji
-                    unified={form.values.emoji}
-                    emojiStyle={EmojiStyle.APPLE}
-                    size={22}
-                  />
-                )
-                : <IconMoodSmile size={22} />}
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <EmojiPicker
-              theme={Theme.DARK}
-              onEmojiClick={(emoji) => {
-                form.setFieldValue("emoji", emoji.unified);
-                setShowEmojiPicker(false);
-              }}
-            />
-          </Menu.Dropdown>
-        </Menu>
-
-        <TextInput
-          placeholder="Create collection"
-          style={{ width: "90%" }}
-          {...form.getInputProps("name")}
-          required
-        />
-      </Group>
-
-      <Group position="right">
-        <Button
-          my="md"
-          color="teal"
-          loading={isLoading}
-          type="submit"
-        >
-          Save Collection
-        </Button>
-      </Group>
-    </form>
-  );
-}

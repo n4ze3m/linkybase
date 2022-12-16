@@ -15,7 +15,8 @@ import { Emoji, EmojiStyle } from "emoji-picker-react";
 import { MoveModal } from "../Common/MoveModal";
 import { useInView } from "react-intersection-observer";
 import { PreviewCard } from "../Common/PreviewCard";
-import { IconEdit, IconSettings } from "@tabler/icons";
+import { IconEdit, IconSettings, IconSettings2 } from "@tabler/icons";
+import { SettingsModal } from "./Settings";
 const useStyles = createStyles((theme) => ({
   linkContainer: {
     marginTop: theme.spacing.md,
@@ -34,6 +35,8 @@ const useStyles = createStyles((theme) => ({
 export const CollectionBody: React.FC = () => {
   const router = useRouter();
   const { ref: inRef, inView } = useInView();
+
+  const [openSettingsModal, setOpenSettingsModal] = React.useState(false);
 
   const { classes } = useStyles();
 
@@ -60,40 +63,42 @@ export const CollectionBody: React.FC = () => {
   return (
     <Container my="md">
       {status === "loading" ? <LoadingBreadcrumb /> : (
-        <Group position="apart">
-          <Group>
-            {status === "success" && collection?.pages.length > 0 &&
-                collection?.pages[0]?.collection.emoji
-              ? (
-                <Emoji
-                  unified={collection?.pages[0]?.collection.emoji}
-                  size={32}
-                  emojiStyle={EmojiStyle.APPLE}
-                />
-              )
-              : null}
-            <Title weight="bold" color="dimmed">
-              {status === "success" && collection?.pages.length > 0
-                ? collection?.pages[0]?.collection.name
-                : "Untitled"}
-            </Title>
-          </Group>
-          <Group position="right">
-            <ActionIcon color="gray">
-              <IconEdit
-                stroke={1.5}
-              />
-            </ActionIcon>
-            <UnstyledButton>
-              <Text
-                size="sm"
-                color="dimmed"
+        <>
+          <Group position="apart">
+            <Group>
+              {status === "success" && collection?.pages.length > 0 &&
+                  collection?.pages[0]?.collection.emoji
+                ? (
+                  <Emoji
+                    unified={collection?.pages[0]?.collection.emoji}
+                    size={32}
+                    emojiStyle={EmojiStyle.APPLE}
+                  />
+                )
+                : null}
+              <Title weight="bold" color="dimmed">
+                {status === "success" && collection?.pages.length > 0
+                  ? collection?.pages[0]?.collection.name
+                  : "Untitled"}
+              </Title>
+            </Group>
+            <Group position="right">
+              <ActionIcon
+                color="gray"
+                onClick={() => setOpenSettingsModal(true)}
               >
-                Share
-              </Text>
-            </UnstyledButton>
+                <IconSettings2
+                  stroke={1.5}
+                />
+              </ActionIcon>
+            </Group>
           </Group>
-        </Group>
+      {
+        status === "success" && collection?.pages.length > 0 && <Text color="dimmed" size="sm">
+{           collection?.pages[0]?.collection.description}
+        </Text>
+      }
+        </>
       )}
       <div className={classes.linkContainer}>
         {status === "loading" ? <Loading /> : null}
@@ -126,6 +131,14 @@ export const CollectionBody: React.FC = () => {
           onClose={() => setOpenMoveModal(false)}
           linkId={linkId}
         />
+        {openSettingsModal &&
+          (
+            <SettingsModal
+              {...collection?.pages[0]?.collection!}
+              open={openSettingsModal}
+              onClose={() => setOpenSettingsModal(false)}
+            />
+          )}
       </div>
     </Container>
   );

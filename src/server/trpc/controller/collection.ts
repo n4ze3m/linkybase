@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { Context } from "../context"
-import { createCollectionType, getCollectionByIdType } from "../schema/collection.schema"
-
+import { collectionByIDType, createCollectionType, getCollectionByIdType, updateCollectionType } from "../schema/collection.schema"
+import slugify from "slugify"
 export const createCollectionController = async (
     {
         input,
@@ -60,6 +60,9 @@ export const getUserCollectionsController = async (
     const collections = await ctx.prisma.collection.findMany({
         where: {
             userId: user.id
+        },
+        orderBy: {
+            createdAt: "asc"
         }
     })
 
@@ -135,3 +138,112 @@ export const getCollectionsByIdController = async (
 
 }
 
+export const updateCollectionController = async (
+    {
+        ctx,
+        input
+    }: {
+        ctx: Context,
+        input: updateCollectionType
+    }
+) => {
+    const user = ctx.user
+    if (!user) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to update a collection"
+        })
+    }
+
+
+    const collection = await ctx.prisma.collection.findFirst({
+        where: {
+            userId: user.id,
+            id: input.id
+        }
+    })
+
+    if (!collection) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Collection not found"
+        })
+    }
+
+    await ctx.prisma.collection.update({
+        where: {
+            id: input.id
+        },
+        data: {
+            ...input.values
+        }
+    })
+
+    return "Collection updated"
+}
+
+export const shareCollectionController = async (
+    {
+        ctx,
+        input
+    }: {
+        ctx: Context,
+        input: collectionByIDType
+    }
+) => {
+    const user = ctx.user
+
+    if (!user) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to share a collection"
+        })
+    }
+
+    const collection = await ctx.prisma.collection.findFirst({
+        where: {
+            userId: user.id,
+            id: input.id
+        }
+    })
+
+    if (!collection) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Collection not found"
+        })
+    }
+
+
+    if (!collection.publicSlug) {
+        const slug = slugify(`${collection.name}-${collection.id}`, {
+            lower: true,
+            strict: true,
+        })
+
+        await ctx.prisma.collection.update({
+            where: {
+                id: input.id
+            },
+            data: {
+                publicSlug: slug
+            }
+        })
+    }
+
+
+    const toggle = collection.isPublic ? false : true
+
+    await ctx.prisma.collection.update({
+        where: {
+            id: input.id
+        },
+        data: {
+            isPublic: toggle
+        }
+    })
+
+
+    return "Collection shared"
+
+}

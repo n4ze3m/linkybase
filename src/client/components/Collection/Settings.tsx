@@ -27,7 +27,7 @@ interface SettingsModalProps extends Collection {
 
 export const SettingsModal = (data: SettingsModalProps) => {
   const client = trpc.useContext();
-
+  const router = useRouter();
   const {
     mutate: updateCollection,
     isLoading: isUpdatingCollection,
@@ -61,6 +61,8 @@ export const SettingsModal = (data: SettingsModalProps) => {
     },
   });
 
+  const [deleteLink, setDeleteLink] = React.useState<boolean>(false);
+
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   const [alreadyLoaded, setAlreadyLoaded] = React.useState(false);
   const [switchValue, setSwitchValue] = React.useState<boolean>(false);
@@ -77,13 +79,26 @@ export const SettingsModal = (data: SettingsModalProps) => {
     }
   }, [data]);
 
-  const router = useRouter()
-
-
-
   const getBaseURL = () => {
     return window.location.origin;
-  }
+  };
+
+  const {
+    mutate: deleteCollection,
+    isLoading: isDeletingCollection,
+  } = trpc.collection.delete.useMutation({
+    onSuccess: () => {
+      client.invalidate();
+      router.push("/dashboard");
+    },
+    onError: (err) => {
+      showNotification({
+        title: "Error",
+        color: "red",
+        message: err.message,
+      });
+    }
+  });
 
   return (
     <Modal
@@ -186,9 +201,7 @@ export const SettingsModal = (data: SettingsModalProps) => {
       {data.isPublic && (
         <TextInput
           readOnly
-          value={data.publicSlug
-            ? `${getBaseURL()}/p/${data.publicSlug}`
-            : ""}
+          value={data.publicSlug ? `${getBaseURL()}/p/${data.publicSlug}` : ""}
           rightSection={
             <ActionIcon>
               <IconClipboard />
@@ -203,11 +216,24 @@ export const SettingsModal = (data: SettingsModalProps) => {
       <Group position="apart" noWrap spacing="xl" my="md">
         <div>
           <Text>Delete Collection</Text>
-          <Checkbox 
-          size="sm"
-          label="Delete all links in this collection" color="red" />
+          <Checkbox
+            onChange={(e) => {
+              setDeleteLink(e.currentTarget.checked);
+            }}
+            size="sm"
+            label="Delete all links in this collection"
+            color="red"
+          />
         </div>
-        <Button color="red" variant="outline">
+        <Button 
+        onClick={() => {
+          deleteCollection({
+            id: data.id,
+            deleteLink: deleteLink,
+          });
+        }}
+        loading={isDeletingCollection}
+        color="red" variant="outline">
           Delete Collection
         </Button>
       </Group>

@@ -1,4 +1,4 @@
-import { number, object, string, TypeOf } from "zod"
+import { boolean, number, object, string, TypeOf } from "zod"
 
 export const createCollectionInput = object({
     name: string(),
@@ -32,6 +32,12 @@ export const collectionBySlug = object({
 })
 
 
+export const deleteCollection = object({
+    id: string(),
+    deleteLink: boolean().default(false),
+})
+
+
 export type createCollectionType = TypeOf<typeof createCollectionInput>
 
 export type getCollectionByIdType = TypeOf<typeof getCollectionByIdInput>
@@ -41,3 +47,5 @@ export type updateCollectionType = TypeOf<typeof updateCollectionInput>
 export type collectionByIDType = TypeOf<typeof collectionByID>
 
 export type collectionBySlugType = TypeOf<typeof collectionBySlug>
+
+export type deleteCollectionType = TypeOf<typeof deleteCollection>

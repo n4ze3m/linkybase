@@ -1,8 +1,9 @@
+import { Link } from "@prisma/client"
 import { TRPCError } from "@trpc/server"
 import axios from "axios"
 import { Context } from "../context"
 import { paginationType } from "../schema/common.schema"
-import { createLinkType, deleteLinkType, moveLinkType } from "../schema/link.schema"
+import { createLinkType, deleteLinkType, moveLinkType, searchLinkInput, searchLinkType, searchResultType } from "../schema/link.schema"
 const R_URL = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
 
 
@@ -230,5 +231,45 @@ export const deleteLink = async ({
 
     return "OK"
 
+
+}
+
+
+export const searchLink = async ({
+    ctx,
+    input
+}: {
+    ctx: Context,
+    input: searchLinkType
+}) => {
+    const user = ctx.user
+
+    if (!user) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to search links"
+        })
+    }
+
+    const responseTitle = await ctx.supabase.from("Link").select("*").eq("userId", user.id).textSearch("title", input.query, {
+        config: "english"
+    })
+
+    const responseDescription = await ctx.supabase.from("Link").select("*").eq("userId", user.id).textSearch("description", input.query, {
+        config: "english"
+    })
+
+    const responseUrl = await ctx.supabase.from("Link").select("*").eq("userId", user.id).textSearch("url", input.query, {
+        config: "english"
+    })
+
+
+    const titleData = responseTitle.data || []
+    const descriptionData = responseDescription.data || []
+    const urlData = responseUrl.data || []
+
+    const searchResult = [...titleData, ...descriptionData, ...urlData].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i)
+
+    return searchResult as Link[]
 
 }

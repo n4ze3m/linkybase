@@ -30,9 +30,11 @@ export const createContext = async (opts: CreateNextContextOptions) => {
     data: { user },
   } = await supabaseServerClient.auth.getUser();
 
+
   return {
     ...(await createContextInner({})),
     user,
+    supabase: supabaseServerClient,
   }
 };
 

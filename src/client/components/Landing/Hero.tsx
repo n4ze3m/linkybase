@@ -1,6 +1,8 @@
 import { createStyles, Container, Text, Button, Group } from "@mantine/core";
 import { IconBrandGithub } from "@tabler/icons";
 import { Emoji, EmojiStyle } from "emoji-picker-react";
+import { useRouter } from "next/router";
+import { Feature } from "./Feature";
 
 const BREAKPOINT = "@media (max-width: 755px)";
 
@@ -8,6 +10,7 @@ const useStyles = createStyles((theme) => ({
 	wrapper: {
 		position: "relative",
 		minHeight: 700,
+		paddingBottom: 10,
 		backgroundColor:
 			theme.colorScheme === "dark"
 				? theme.colors.dark[8]
@@ -75,11 +78,13 @@ const useStyles = createStyles((theme) => ({
 export function Hero() {
 	const { classes } = useStyles();
 
+	const router = useRouter();
+
 	return (
 		<div className={classes.wrapper}>
 			<Container size={900} className={classes.inner}>
 				<h1 className={classes.title}>
-					Save
+					Manage your{" "}
 					<Text
 						component="span"
 						variant="gradient"
@@ -87,9 +92,9 @@ export function Hero() {
 						inherit
 					>
 						{" "}
-						your links{" "}
+						links{" "}
 					</Text>{" "}
-					in one place{" "}
+					easily{" "}
 					<Emoji size={42} unified="1f517" emojiStyle={EmojiStyle.APPLE} />
 				</h1>
 
@@ -105,6 +110,7 @@ export function Hero() {
 						className={classes.control}
 						variant="gradient"
 						gradient={{ from: "green", to: "teal" }}
+						onClick={() => router.push("/auth")}
 					>
 						Get started
 					</Button>
@@ -121,6 +127,7 @@ export function Hero() {
 					</Button>
 				</Group>
 			</Container>
+			<Feature />
 		</div>
 	);
 }

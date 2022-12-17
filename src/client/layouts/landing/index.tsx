@@ -7,5 +7,10 @@ interface IProps {
 }
 
 export const LandingLayout = ({ children }: IProps) => {
-	return <AppShell header={<LinkYHeader />}>{children}</AppShell>;
+	return (
+		<div>
+			<LinkYHeader /> 
+			{children}
+		</div>
+	);
 };

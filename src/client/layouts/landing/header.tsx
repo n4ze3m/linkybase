@@ -10,6 +10,7 @@ import {
 	ScrollArea,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
@@ -37,7 +38,7 @@ export function LinkYHeader() {
 		<Box>
 			<Header height={60} px="md">
 				<Group position="apart" sx={{ height: "100%" }}>
-					<Text weight="bold" size="lg">
+					<Text weight="bold" size="lg" component={Link} href="/">
 						LinkYBase
 					</Text>
 					<Group className={classes.hiddenMobile}>

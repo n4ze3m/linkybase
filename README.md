@@ -1,28 +1,58 @@
-# Create T3 App
+# LinkYBase
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Linkybase is a free and open source web app that allows you to manage your links in one place. Collect, organize, and share your links with your friends and family.
 
-## What's next? How do I make an app with this?
+## Current Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Add links
+- Create collections
+- Share collections
+- Search links (full text search)
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Planned Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- Browser extension to add links
+- Import links from other services
+- Export links to other services
 
-## Learn More
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## Development
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### Requirements
 
-## How do I deploy this?
+- Node.js
+- Supabase account
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+### Setup
+
+1. Clone the repository
+
+2. Install dependencies
+
+   ```bash
+   npm install
+   ```
+
+3. Create a Supabase project
+
+4. Add required environment variables
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   - `DATABASE_URL` - Supabase database url
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+   - `NEXT_PUBLIC_SUPABASE_SERVICE_KEY` - Supabase service key
+   -  `LINKY_SCRAPY_URL` - LinkyScrapy API url
+
+* for `LINKY_SCRAPY_URL` host supabase edge functions
+
+5. Run the development server
+
+   ```bash
+
+    npm run dev
+    
+    ```

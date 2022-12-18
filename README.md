@@ -14,6 +14,7 @@ Linkybase is a free and open source web app that allows you to manage your links
 - Browser extension to add links
 - Import links from other services
 - Export links to other services
+- DND to reorder links
 
 
 ## Development

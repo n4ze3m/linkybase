@@ -17,6 +17,7 @@ import { useInView } from "react-intersection-observer";
 import { PreviewCard } from "../Common/PreviewCard";
 import { IconEdit, IconSettings, IconSettings2 } from "@tabler/icons";
 import { SettingsModal } from "./Settings";
+import { Empy } from "../Common/Empy";
 const useStyles = createStyles((theme) => ({
 	linkContainer: {
 		marginTop: theme.spacing.md,
@@ -124,6 +125,8 @@ export const CollectionBody: React.FC = () => {
 						<div ref={inRef}>
 							{hasNextPage && isFetchingNextPage && "Loading more..."}
 						</div>
+
+						{collection.pages[0]?.links.length === 0 ? <Empy /> : null}
 					</div>
 				) : null}
 				<MoveModal

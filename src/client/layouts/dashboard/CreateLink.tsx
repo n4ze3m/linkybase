@@ -3,8 +3,8 @@ import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import React from "react";
 import { trpc } from "src/utils/trpc";
-const R_URL =
-  /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+
+const R_URL = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
 
 export function CreateLink({ setHidden }: {
   setHidden: React.Dispatch<React.SetStateAction<boolean>>;

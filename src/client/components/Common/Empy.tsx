@@ -2,7 +2,6 @@ import { createStyles, Text } from "@mantine/core";
 import React from "react";
 import EmpyIcon from "./EmpyIcon";
 
-
 const useStyles = createStyles((theme) => ({
 	// create style to center the icon and text in the middle of the page
 	main: {
@@ -12,19 +11,16 @@ const useStyles = createStyles((theme) => ({
 		justifyContent: "center",
 		height: "100%",
 	},
-
 }));
 
 export const Empy = () => {
 	const { classes } = useStyles();
 	return (
-		<div
-			className={classes.main}
-		>
+		<div className={classes.main}>
 			<EmpyIcon />
 			<Text size="xl">
-                Oops, there is nothing here yet.
-            </Text>
+				Kinda empty here, huh? Add some links to get started.
+			</Text>
 		</div>
 	);
 };

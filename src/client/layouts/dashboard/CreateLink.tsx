@@ -4,7 +4,7 @@ import { showNotification } from "@mantine/notifications";
 import React from "react";
 import { trpc } from "src/utils/trpc";
 
-const R_URL = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+const R_URL = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
 export function CreateLink({ setHidden }: {
   setHidden: React.Dispatch<React.SetStateAction<boolean>>;

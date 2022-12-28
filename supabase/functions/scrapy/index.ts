@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 function getBaseUrl(url: string): string {
-  const regex = /^https?:\/\/([^/?#]+)(?:[/?#]|$)/i;
+  const regex = /^(http|https|www)/
   const matches = regex.exec(url);
   return matches != null ? matches[1] : "";
 }
@@ -17,62 +17,67 @@ function getBaseUrl(url: string): string {
 function _findTitle(doc: HTMLDocument) {
   let title = doc.querySelector("title")?.textContent
   if (!title) {
-      const metaTitle = doc.querySelector("meta[property='og:title']")?.getAttribute("content") ||
-          doc.querySelector("meta[name='twitter:title']")?.getAttribute("content") ||
-          doc.querySelector("meta[name='title']")?.getAttribute("content")
-      if (metaTitle) {
-          title = metaTitle
+    const metaTitle = doc.querySelector("meta[property='og:title']")?.getAttribute("content") ||
+      doc.querySelector("meta[name='twitter:title']")?.getAttribute("content") ||
+      doc.querySelector("meta[name='title']")?.getAttribute("content")
+    if (metaTitle) {
+      title = metaTitle
+    } else {
+      const h1 = doc.querySelector("h1")
+      if (h1) {
+        title = h1.textContent
       } else {
-          const h1 = doc.querySelector("h1")
-          if (h1) {
-              title = h1.textContent
-          } else {
-              const h2 = doc.querySelector("h2")
-              if (h2) {
-                  title = h2.textContent
-              } else {
-                  return ""
-              }
-          }
+        const h2 = doc.querySelector("h2")
+        if (h2) {
+          title = h2.textContent
+        } else {
+          return ""
+        }
       }
+    }
   }
   return title
 }
 
 function _findDescription(doc: HTMLDocument) {
-  let description = doc.querySelector("meta[name='description']")?.getAttribute("content") || doc.querySelector("meta[property='og:description']")?.getAttribute("content") || doc.querySelector("meta[name='twitter:description']")?.getAttribute("content") 
-  if(!description) {
-      const p = doc.querySelector("p")
-      if(p) {
-          description = p.textContent
-      } else {
-          return ""
-      }
+  let description = doc.querySelector("meta[name='description']")?.getAttribute("content") || doc.querySelector("meta[property='og:description']")?.getAttribute("content") || doc.querySelector("meta[name='twitter:description']")?.getAttribute("content")
+  if (!description) {
+    const p = doc.querySelector("p")
+    if (p) {
+      description = p.textContent
+    } else {
+      return ""
+    }
   }
   return description
 }
 
 
 function _findImage(doc: HTMLDocument, url: string) {
-  let image = doc.querySelector("meta[property='og:image']")?.getAttribute("content") || doc.querySelector("meta[name='twitter:image']")?.getAttribute("content") || doc.querySelector("meta[name='image']")?.getAttribute("content") 
-  if(!image) {
-      // find first image
-      const img = doc.querySelector("img")
-      if(img) {
-          const src = img.getAttribute("src")
-          if(src) {
-              image = src
-          } else {
-              return ""
-          }
+  let image = doc.querySelector("meta[property='og:image']")?.getAttribute("content") || doc.querySelector("meta[name='twitter:image']")?.getAttribute("content") || doc.querySelector("meta[name='image']")?.getAttribute("content")
+  if (!image) {
+    // find first image
+    const img = doc.querySelector("img")
+    if (img) {
+      const src = img.getAttribute("src")
+      if (src) {
+        image = src
+      } else {
+        return ""
       }
+    }
   }
-  if(image?.startsWith("//")) {
-      image = url.split("//")[0] + image
+  if (image?.startsWith("//")) {
+    image = url.split("//")[0] + image
   }
   return image
 }
 
+
+const isTwitterUrl = (url: string) => {
+  const regex = /twitter\.com/
+  return regex.test(url)
+}
 
 const scrapSite = async (doc: HTMLDocument, url: string) => {
   const title = _findTitle(doc)
@@ -105,19 +110,25 @@ serve(async (req) => {
     }
 
 
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582",
-        "Connection": "keep-alive",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-        "Cache-Control": "max-age=0",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Site": "same-origin",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-User": "?1",
-        "Sec-Fetch-Dest": "document",
+    const headers: HeadersInit = isTwitterUrl(url) ? {
+      "User-Agent": 'Mozilla/5.0 (compatible; LinyBase/1.0; +http://www.n4ze3m.com/bot.html)',
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+    } : {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582",
+      "Connection": "keep-alive",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+      "Cache-Control": "max-age=0",
+      "Upgrade-Insecure-Requests": "1",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-User": "?1",
+      "Sec-Fetch-Dest": "document",
 
-      },
+    }
+
+
+    const response = await fetch(url, {
+      headers: headers,
     });
 
     const html = await response.text();
